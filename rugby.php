@@ -22,7 +22,9 @@ $results = array();
 $results['score1'] = "0";
 $results['score2'] = "0";
 
-
+/*
+curl 'http://d.flashresultats.fr/x/feed/d_su_zgcMW8gI_fr_1' -H 'X-Fsign: SW9D1eZo' -H 'Referer: http://d.flashresultats.fr/x/feed/proxy' 
+*/
 $url = "http://d.".$hostname.".fr/x/feed/d_su_".$match."_fr_1";
 
 $ch = curl_init();
@@ -41,6 +43,10 @@ $ret = str_replace('&nbsp;', ' ', $ret);
 <td class="score"><span class="p2_home">0</span> - <span class="p2_away">0</span></td>
 <td class="score" rowspan="3"><span class="p1_home">1</span> - <span class="p1_away">2</span></td>
 */
+/*
+<table id="parts" class="parts-first vertical"><tbody><tr class="stage-header stage-12"><td colspan="3" class="h-part">1. mi-temps</td></tr><tr class="odd"><td class="summary-vertical fl"><div class="wrapper"> </div></td><td class="score" rowspan="4"><span class="p1_home">3</span> - <span class="p1_away">10</span></td><td class="summary-vertical fr"><div class="wrapper"><div class="time-box">8'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div>(Try)  <span class="participant-name">Bobo S.</span></div></td></tr><tr class="even"><td class="summary-vertical fl"><div class="wrapper"> </div></td><td class="summary-vertical fr"><div class="wrapper"><div class="time-box">9'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div>(Conversion Goal)  <span class="participant-name">du Plessis W.</span></div></td></tr><tr class="odd"><td class="summary-vertical fl"><div class="wrapper"> </div></td><td class="summary-vertical fr"><div class="wrapper"><div class="time-box">14'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div>(Penalty Goal)  <span class="participant-name">du Plessis W.</span></div></td></tr><tr class="even"><td class="summary-vertical fl"><div class="wrapper"><div class="time-box">18'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div><span class="participant-name">Plisson J.</span> (Penalty Goal) </div></td><td class="summary-vertical fr"><div class="wrapper"> </div></td></tr></tbody></table>
+*/
+
 $score1 = 0;
 $score2 = 0;
 if(preg_match_all('!<td class="score"( rowspan="[0-9]+")*><span class="p[0-9]_home">([0-9]+)</span> - <span class="p[0-9]_away">([0-9]+)</span></td>!is', $ret, $matches))
@@ -52,7 +58,7 @@ if(preg_match_all('!<td class="score"( rowspan="[0-9]+")*><span class="p[0-9]_ho
     $score1 += $matches[2][$i];
     $score2 += $matches[3][$i];
     
-    if($score1 != "0" && $score2 != "0")
+    if($score1 != "0" || $score2 != "0")
     {
       $results['score1'] = $score1;
       $results['score2'] = $score2;
