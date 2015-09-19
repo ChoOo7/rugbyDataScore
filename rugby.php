@@ -47,6 +47,7 @@ $ret = str_replace('&nbsp;', ' ', $ret);
 <table id="parts" class="parts-first vertical"><tbody><tr class="stage-header stage-12"><td colspan="3" class="h-part">1. mi-temps</td></tr><tr class="odd"><td class="summary-vertical fl"><div class="wrapper"> </div></td><td class="score" rowspan="4"><span class="p1_home">3</span> - <span class="p1_away">10</span></td><td class="summary-vertical fr"><div class="wrapper"><div class="time-box">8'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div>(Try)  <span class="participant-name">Bobo S.</span></div></td></tr><tr class="even"><td class="summary-vertical fl"><div class="wrapper"> </div></td><td class="summary-vertical fr"><div class="wrapper"><div class="time-box">9'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div>(Conversion Goal)  <span class="participant-name">du Plessis W.</span></div></td></tr><tr class="odd"><td class="summary-vertical fl"><div class="wrapper"> </div></td><td class="summary-vertical fr"><div class="wrapper"><div class="time-box">14'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div>(Penalty Goal)  <span class="participant-name">du Plessis W.</span></div></td></tr><tr class="even"><td class="summary-vertical fl"><div class="wrapper"><div class="time-box">18'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div><span class="participant-name">Plisson J.</span> (Penalty Goal) </div></td><td class="summary-vertical fr"><div class="wrapper"> </div></td></tr></tbody></table>
 */
 
+$idAction=0;
 $score1 = 0;
 $score2 = 0;
 if(preg_match_all('!<td class="score"( rowspan="[0-9]+")*><span class="p[0-9]_home">([0-9]+)</span> - <span class="p[0-9]_away">([0-9]+)</span></td>!is', $ret, $matches))
@@ -144,6 +145,7 @@ foreach($xml->tbody->tr as $tr)
   
   
   $results['actions'][] = array(
+    'id'=>$idAction++,
     'action'=>$action,
     'time'=>$time,
     'who'=>$who,
