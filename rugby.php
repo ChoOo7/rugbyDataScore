@@ -65,6 +65,7 @@ if(preg_match_all('!<td class="score"( rowspan="[0-9]+")*><span class="p[0-9]_ho
     }
   }
 }
+//var_dump($ret);
 $xml = simplexml_load_string($ret);
 
 
@@ -95,7 +96,7 @@ foreach($xml->tbody->tr as $tr)
 	  foreach($div->div as $subDiv)
 	  {
 	    $cl = (string)$subDiv['class'];
-	    if($cl == 'time-box')
+	    if($cl == 'time-box' || $cl == 'time-box-wide')
 	    {
 	      $time = (string)$subDiv;
 	    }
@@ -132,6 +133,15 @@ foreach($xml->tbody->tr as $tr)
   }
   
   $team = min(2, $team);
+  
+  if(strpos($time, '+') !== false)
+  {
+    $tmp = str_replace("'", "", $time);
+    $tmp = explode('+', $tmp);
+    $time = $tmp[0] + $tmp[1];
+    $time .= "'";
+  }
+  
   
   $results['actions'][] = array(
     'action'=>$action,
