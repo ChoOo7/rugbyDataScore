@@ -9,6 +9,10 @@ if(php_sapi_name() == "cli")
   $match = $_GET['match'];//"d2OVreOh";
   $xfsign = $_GET['xfsign'];//"SW9D1eZo";
 }
+if(empty($xfsign))
+{
+  $xfsign = "SW9D1eZo";  
+}
 
 
 //Prevent the full hostname to be searchable on github search :)
