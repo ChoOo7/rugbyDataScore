@@ -103,6 +103,16 @@ foreach($xml->tbody->tr as $tr)
 	    {
 	      $action = "redcard";
 	    }
+	    if(strpos($cl, 'y-card') !== false)
+	    {
+	      $action = "yellowcard";
+	    }
+	    
+	    $content = (string)$div;
+	    if($content == '(Pénalty)')
+	    {
+	      $action='penalty';
+	    }
 	  }
 	  
 	  
