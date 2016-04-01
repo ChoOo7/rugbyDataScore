@@ -9,6 +9,10 @@ if(php_sapi_name() == "cli")
   $match = $_GET['match'];//"d2OVreOh";
   $xfsign = $_GET['xfsign'];//"SW9D1eZo";
 }
+if(empty($xfsign))
+{
+  $xfsign = "SW9D1eZo";  
+}
 
 
 //Prevent the full hostname to be searchable on github search :)
@@ -37,15 +41,6 @@ $ret = curl_exec($ch);
 $tmp = explode('</table>', $ret);
 $ret = $tmp[0].'</table>';
 $ret = str_replace('&nbsp;', ' ', $ret);
-
-//$ret = '<td class="score" rowspan="6"><span class="p1_home">20</span> - <span class="p1_away">6</span></td>';
-/*
-<td class="score"><span class="p2_home">0</span> - <span class="p2_away">0</span></td>
-<td class="score" rowspan="3"><span class="p1_home">1</span> - <span class="p1_away">2</span></td>
-*/
-/*
-<table id="parts" class="parts-first vertical"><tbody><tr class="stage-header stage-12"><td colspan="3" class="h-part">1. mi-temps</td></tr><tr class="odd"><td class="summary-vertical fl"><div class="wrapper"> </div></td><td class="score" rowspan="4"><span class="p1_home">3</span> - <span class="p1_away">10</span></td><td class="summary-vertical fr"><div class="wrapper"><div class="time-box">8'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div>(Try)  <span class="participant-name">Bobo S.</span></div></td></tr><tr class="even"><td class="summary-vertical fl"><div class="wrapper"> </div></td><td class="summary-vertical fr"><div class="wrapper"><div class="time-box">9'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div>(Conversion Goal)  <span class="participant-name">du Plessis W.</span></div></td></tr><tr class="odd"><td class="summary-vertical fl"><div class="wrapper"> </div></td><td class="summary-vertical fr"><div class="wrapper"><div class="time-box">14'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div>(Penalty Goal)  <span class="participant-name">du Plessis W.</span></div></td></tr><tr class="even"><td class="summary-vertical fl"><div class="wrapper"><div class="time-box">18'</div><div class="icon-box rugby-union-ball"><span class="icon rugby-union-ball"> </span></div><span class="participant-name">Plisson J.</span> (Penalty Goal) </div></td><td class="summary-vertical fr"><div class="wrapper"> </div></td></tr></tbody></table>
-*/
 
 $idAction=0;
 $score1 = 0;
@@ -80,9 +75,12 @@ foreach($xml->tbody->tr as $tr)
   if($class == 'odd' || $class == 'even')
   {
     $action = "goal";
+    $reason = null;
     $time = null;
     $who = null;
     $team = 0;
+    $subOutName = null;
+    $assist = null;
     
     foreach($tr->td as $td)
     {
@@ -105,17 +103,78 @@ foreach($xml->tbody->tr as $tr)
 	    {
 	      $action = "goal";
 	    }
+	    if(strpos($cl, 'r-card') !== false)
+	    {
+	      $action = "redcard";
+	    }
+	    if(strpos($cl, 'y-card') !== false)
+	    {
+	      $action = "yellowcard";
+	    }
+	    
+	    $content = (string)$div;
+	    if($content == '(Pénalty)')
+	    {
+	      $action='penalty';
+	    }
 	  }
+	  
+	  
 	  foreach($div->span as $subDiv)
 	  {
-	    if($subDiv['class'] == 'participant-name')
+            $class = $subDiv['class'];
+	    if($class == 'substitution-out-name')
 	    {
-	      $who = (string)$subDiv;
+	      $subOutName = trim((string)$subDiv);
+	      if(empty($subOutName))
+	      {
+		$subOutName = ((string)$subDiv->a);
+	      }
+            }
+	    if($class == 'assist')
+	    {
+	      $assist = trim(trim(trim((string)$subDiv), '()'));
+	      if(empty($assist))
+	      {
+		$assist = ((string)$subDiv->a);
+	      }
+            }
+          }
+	  
+	  
+	  foreach($div->span as $subDiv)
+	  {
+            $class = $subDiv['class'];
+	    if($class == 'substitution-out-name')
+	    {
+	      $subOutName = trim((string)$subDiv);
+	      if(empty($subOutName))
+	      {
+		$subOutName = ((string)$subDiv->a);
+	      }
+	      break;
+            }
+          }
+	  foreach($div->span as $subDiv)
+	  {
+            $class = $subDiv['class'];
+	    if(strpos($class, 'subincident') !== false)
+	    {
+	      $reason = trim((string)$subDiv, '()');
+	    }
+	    if($class == 'participant-name' || $class == 'substitution-in-name')
+	    {
+	      $who = trim((string)$subDiv);
 	      if(empty($who))
 	      {
 		$who = ((string)$subDiv->a);
 	      }
 	      
+	      
+	      if($class == 'substitution-in-name')
+	      {
+                $action='substitution';
+              }
 	      break 3;
 	    }
 	  }
@@ -147,6 +206,9 @@ foreach($xml->tbody->tr as $tr)
   $results['actions'][] = array(
     'id'=>$idAction++,
     'action'=>$action,
+    'reason'=>$reason,
+    'substitution-out-name'=>$subOutName,
+    'action-assist-name'=>$assist,
     'time'=>$time,
     'who'=>$who,
     'team'=>$team,
