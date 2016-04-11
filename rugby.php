@@ -27,13 +27,10 @@ $results['score1'] = "0";
 $results['score2'] = "0";
 $results['scores'] = array();
 
-/*
-curl 'http://d.flashresultats.fr/x/feed/d_su_zgcMW8gI_fr_1' -H 'X-Fsign: SW9D1eZo' -H 'Referer: http://d.flashresultats.fr/x/feed/proxy' 
-*/
 $url = "http://d.".$hostname.".fr/x/feed/d_su_".$match."_fr_1";
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_REFERER, 'http://d.flashresultats.fr/x/feed/proxy');
+curl_setopt($ch, CURLOPT_REFERER, 'http://d.fl'.'ash'.'resu'.'ltats.fr/x/feed/proxy');
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36', 'X-Fsign: '.$xfsign, 'Accept-Language: *', 'Connection: keep-alive', 'X-GeoIP: 1')); 
@@ -240,7 +237,7 @@ foreach($xml->tbody->tr as $tr)
 $url = "http://www.".$hostname.".fr/match/".$match."/";
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_REFERER, 'http://d.flashresultats.fr/x/feed/proxy');
+curl_setopt($ch, CURLOPT_REFERER, 'http://d.flash'.'resu'.'ltats.fr/x/feed/proxy');
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36', 'X-Fsign: '.$xfsign, 'Accept-Language: *', 'Connection: keep-alive', 'X-GeoIP: 1')); 
