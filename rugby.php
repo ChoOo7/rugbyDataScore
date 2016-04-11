@@ -25,6 +25,7 @@ $results = array();
 
 $results['score1'] = "0";
 $results['score2'] = "0";
+$results['scores'] = array();
 
 /*
 curl 'http://d.flashresultats.fr/x/feed/d_su_zgcMW8gI_fr_1' -H 'X-Fsign: SW9D1eZo' -H 'Referer: http://d.flashresultats.fr/x/feed/proxy' 
@@ -51,13 +52,31 @@ if(preg_match_all('!<td class="score"( rowspan="[0-9]+")*><span class="p[0-9]_ho
   for($i = 0; $i < $nb; $i++)
   {
     
-    $score1 += $matches[2][$i];
-    $score2 += $matches[3][$i];
+    $local1Score = $matches[2][$i];
+    $local2Score = $matches[3][$i];
     
-    if($score1 != "0" || $score2 != "0")
+    $results['scores'][] = array($local1Score, $local2Score);
+    
+    if($i < 3)
     {
-      $results['score1'] = $score1;
-      $results['score2'] = $score2;
+        
+        $score1 += $local1Score;
+        $score2 += $local2Score;
+        
+        if($score1 != "0" || $score2 != "0")
+        {
+            $results['score1'] = $score1;
+            $results['score2'] = $score2;
+        }
+    }else{
+        if($local1Score > $local2Score)
+        {
+            $score1++;
+        }else{
+            $score2++;
+        }
+        $results['score1'] = $score1;
+        $results['score2'] = $score2;
     }
   }
 }
@@ -67,6 +86,7 @@ $xml = simplexml_load_string($ret);
 
 $results['actions'] = array();
 
+
 $subSequence = 0;
 
 foreach($xml->tbody->tr as $tr)
@@ -75,12 +95,12 @@ foreach($xml->tbody->tr as $tr)
   if($class == 'odd' || $class == 'even')
   {
     $action = "goal";
-    $reason = null;
-    $time = null;
-    $who = null;
+    $reason = "";
+    $time = "";
+    $who = "";
     $team = 0;
-    $subOutName = null;
-    $assist = null;
+    $subOutName = "";
+    $assist = "";
     
     foreach($tr->td as $td)
     {
@@ -207,8 +227,8 @@ foreach($xml->tbody->tr as $tr)
     'id'=>$idAction++,
     'action'=>$action,
     'reason'=>$reason,
-    'substitution-out-name'=>$subOutName,
-    'action-assist-name'=>$assist,
+    'substitutionoutname'=>$subOutName,
+    'actionassistname'=>$assist,
     'time'=>$time,
     'who'=>$who,
     'team'=>$team,
@@ -228,6 +248,7 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', '
 $ret = curl_exec($ch);
 
 $ret = str_replace(array("\n", "\t","\r"), array('', '', ''), $ret);
+
 if(preg_match('!.*<td class="current\-result"><span class="scoreboard">([0-9]+)</span><span class="scoreboard\-divider">\-</span><span class="scoreboard">([0-9]+)</span></td>.*!uis', $ret, $matches))
 {
   $results['score1'] = $matches[1];
@@ -237,6 +258,8 @@ if(preg_match('!.*<td class="current\-result"><span class="scoreboard">([0-9]+)<
   $results['score1'] = $matches[2];
   $results['score2'] = $matches[3];
 }
+
+
 
 preg_match('!.*<td colspan="3" class="mstat">([^<]+)</td>.*!uis', $ret, $matches);
 $results['state'] = html_entity_decode($matches[1]);
