@@ -219,6 +219,10 @@ foreach($xml->tbody->tr as $tr)
     $time .= "'";
   }
   
+  if($action == "goal" && $who == "")
+  {
+    continue;
+  }
   
   $results['actions'][] = array(
     'id'=>$idAction++,
