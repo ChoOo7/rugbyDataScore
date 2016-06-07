@@ -1,17 +1,54 @@
 <?php
+function getStatisticsTypes($statisticName) {
+    $statisticName = str_replace('é', 'e', $statisticName);
+    $statisticName = strtolower(trim($statisticName));
+    switch($statisticName) {
+        case 'poss'.'ess'.'ion de ba'.'lle':
+            return 0;
+        case 'ti'.'rs au b'.'ut':
+            return 1;
+        case 'ti'.'rs ca'.'dres':
+            return 2;
+        case 'ti'.'rs non ca'.'dres':
+            return 3;
+        case 'tir'.'s bloq'.'ues':
+            return 4;
+        case 'corners':
+            return 5;
+        case 'hor'.'s-jeu':
+            return 6;
+        case 'sauv'.'etages d'.'u gard'.'ien':
+            return 7;
+        case 'fau'.'tes':
+            return 8;
+        case 'carto'.'ns jaunes':
+            return 9;
+        case 'carto'.'ns rouges':
+            return 10;
+        case 'coup fr'.'ancs':
+            return 11;
+        case 'touche':
+            return 12;
+    }
+
+    return false;
+}
+
 $match = $xfsign = null;
 
 if(php_sapi_name() == "cli")
 {
-  $match = isset($argv[1]) ? $argv[1] : "d2OVreOh";
+  $match = isset($argv[1]) ? $argv[1] : "E5H9puop";
   $xfsign = "SW9D1eZo";
+  $loadStats = true;
 }else{
-  $match = $_GET['match'];//"d2OVreOh";
+  $match = $_GET['match'];//"E5H9puop";
   $xfsign = $_GET['xfsign'];//"SW9D1eZo";
+  $loadStats = !!$_GET['loadStats'];
 }
 if(empty($xfsign))
 {
-  $xfsign = "SW9D1eZo";  
+  $xfsign = "SW9D1eZo";
 }
 
 
@@ -33,8 +70,8 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_REFERER, 'http://d.fl'.'ash'.'resu'.'ltats.fr/x/feed/proxy');
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36', 'X-Fsign: '.$xfsign, 'Accept-Language: *', 'Connection: keep-alive', 'X-GeoIP: 1')); 
-    
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36', 'X-Fsign: '.$xfsign, 'Accept-Language: *', 'Connection: keep-alive', 'X-GeoIP: 1'));
+
 $ret = curl_exec($ch);
 $tmp = explode('</table>', $ret);
 $ret = $tmp[0].'</table>';
@@ -48,18 +85,18 @@ if(preg_match_all('!<td class="score"( rowspan="[0-9]+")*><span class="p[0-9]_ho
   $nb = count($matches[0]);
   for($i = 0; $i < $nb; $i++)
   {
-    
+
     $local1Score = $matches[2][$i];
     $local2Score = $matches[3][$i];
-    
+
     $results['scores'][] = array($local1Score, $local2Score);
-    
+
     if($i < 3)
     {
-        
+
         $score1 += $local1Score;
         $score2 += $local2Score;
-        
+
         if($score1 != "0" || $score2 != "0")
         {
             $results['score1'] = $score1;
@@ -98,13 +135,13 @@ foreach($xml->tbody->tr as $tr)
     $team = 0;
     $subOutName = "";
     $assist = "";
-    
+
     foreach($tr->td as $td)
     {
       $team++;
       foreach($td->div as $div)
       {
-        
+
 	$divContent = trim((string)$div);
 	if( true || $divContent)
 	{
@@ -128,15 +165,15 @@ foreach($xml->tbody->tr as $tr)
 	    {
 	      $action = "yellowcard";
 	    }
-	    
+
 	    $content = (string)$div;
 	    if($content == '(Pénalty)')
 	    {
 	      $action='penalty';
 	    }
 	  }
-	  
-	  
+
+
 	  foreach($div->span as $subDiv)
 	  {
             $class = $subDiv['class'];
@@ -157,8 +194,8 @@ foreach($xml->tbody->tr as $tr)
 	      }
             }
           }
-	  
-	  
+
+
 	  foreach($div->span as $subDiv)
 	  {
             $class = $subDiv['class'];
@@ -186,8 +223,8 @@ foreach($xml->tbody->tr as $tr)
 	      {
 		$who = ((string)$subDiv->a);
 	      }
-	      
-	      
+
+
 	      if($class == 'substitution-in-name')
 	      {
                 $action='substitution';
@@ -195,7 +232,7 @@ foreach($xml->tbody->tr as $tr)
 	      break 3;
 	    }
 	  }
-	  
+
 	}
       }
     }
@@ -203,14 +240,14 @@ foreach($xml->tbody->tr as $tr)
     $subSequence++;
     continue;
   }
-  
+
   if($action == null)
   {
     continue;
   }
-  
+
   $team = min(2, $team);
-  
+
   if(strpos($time, '+') !== false)
   {
     $tmp = str_replace("'", "", $time);
@@ -218,12 +255,12 @@ foreach($xml->tbody->tr as $tr)
     $time = $tmp[0] + $tmp[1];
     $time .= "'";
   }
-  
+
   if($action == "goal" && $who == "")
   {
     continue;
   }
-  
+
   $results['actions'][] = array(
     'id'=>$idAction++,
     'action'=>$action,
@@ -244,7 +281,7 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_REFERER, 'http://d.flash'.'resu'.'ltats.fr/x/feed/proxy');
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36', 'X-Fsign: '.$xfsign, 'Accept-Language: *', 'Connection: keep-alive', 'X-GeoIP: 1')); 
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36', 'X-Fsign: '.$xfsign, 'Accept-Language: *', 'Connection: keep-alive', 'X-GeoIP: 1'));
 
 $ret = curl_exec($ch);
 
@@ -265,6 +302,50 @@ if(preg_match('!.*<td class="current\-result"><span class="scoreboard">([0-9]+)<
 preg_match('!.*<td colspan="3" class="mstat">([^<]+)</td>.*!uis', $ret, $matches);
 $results['state'] = html_entity_decode($matches[1]);
 
+
+
+
+
+$stats = array();
+if ($loadStats) {
+    $url = "http://d.flash"."resul"."tats.fr/x/feed/d"."_st"."_$match"."_fr"."_1";
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_REFERER, 'http://d.flash'.'resu'.'ltats.fr/x/feed/proxy');
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36', 'X-Fsign: '.$xfsign, 'Accept-Language: *', 'Connection: keep-alive', 'X-GeoIP: 1'));
+
+    $ret = curl_exec($ch);
+    $ret = explode('<div id="tab-st'.'atistics-'.'0-stati'.'stic" style="display: none;">', $ret);
+    if (count($ret) > 1) {
+        $ret = explode('</div><div id="tab-sta'.'tistics'.'-1-st'.'atistic" style="display: none;">', $ret[1]);
+        if ($ret) {
+            $ret = $ret[0];
+        } else {
+            $ret = '';
+        }
+    } else {
+        $ret = '';
+    }
+
+    if ($ret && $xml = simplexml_load_string($ret)) {
+        foreach($xml->tr as $tr)
+        {
+            $statType = getStatisticsTypes((string)$tr->td[1]);
+            if (false === $statType) {
+                continue;
+            }
+
+            $stats[] = array(
+                'type' => $statType,
+                'teamHome' => intval(str_replace('%', '', (string) $tr->td[0]->div[0]), 10),
+                'teamAway' => intval(str_replace('%', '', (string) $tr->td[2]->div[1]), 10)
+            );
+        }
+    }
+}
+$results['stats'] = $stats;
 
 header('Content-Type: application/json');
 echo json_encode($results, JSON_PRETTY_PRINT);
