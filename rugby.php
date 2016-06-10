@@ -274,6 +274,7 @@ if ($loadStats) {
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36', 'X-Fsign: ' . $xfsign, 'Accept-Language: *', 'Connection: keep-alive', 'X-GeoIP: 1'));
 
     $ret = curl_exec($ch);
+    $ret = str_replace('&nbsp;', ' ', $ret);
     $ret = explode('<div id="tab-st' . 'atistics-' . '0-stati' . 'stic" style="display: none;">', $ret);
     if (count($ret) > 1) {
         $ret = explode('</div><div id="tab-sta' . 'tistics' . '-1-st' . 'atistic" style="display: none;">', $ret[1]);
@@ -302,6 +303,37 @@ if ($loadStats) {
     }
 }
 $results['stats'] = $stats;
+
+$url = "http://d.flash" . "resul" . "tats.fr/x/feed/d" . "_pv" . "_$match" . "_fr" . "_1";
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_REFERER, 'http://d.flash' . 'resu' . 'ltats.fr/x/feed/proxy');
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Requested-With: XMLHttpRequest', 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36', 'X-Fsign: ' . $xfsign, 'Accept-Language: *', 'Connection: keep-alive', 'X-GeoIP: 1'));
+
+$ret = curl_exec($ch);
+$ret = explode('<div class="bottom-block">', $ret);
+
+$minutes = -1;
+$additionnalTime = -1;
+if ($ret) {
+    $ret = str_replace('sec"title="', 'sec" title="', $ret[0]);
+    $ret = str_replace('&nbsp;', ' ', $ret);
+    if ($xml = simplexml_load_string($ret)) {
+        try {
+            $formattedTimeString = (string)($xml->tr->td->div);
+            $minutes = intval($formattedTimeString); // Récupère la première partie
+            $additionnalTime = 0;
+            if (false  !== $pos = strpos($formattedTimeString, '+')) {
+                $additionnalTime = intval(substr($formattedTimeString, $pos+1));
+            }
+        } catch(Exception $e) {
+            // Be quiet
+        }
+    }
+}
+
+$results['time'] = array('minutes' => $minutes, 'overtime' => $additionnalTime);
 
 header('Content-Type: application/json');
 echo json_encode($results, JSON_PRETTY_PRINT);
