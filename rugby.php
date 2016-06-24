@@ -30,6 +30,10 @@ function getStatisticsTypes($statisticName)
             return 11;
         case 'touche':
             return 12;
+        case 'tot'.'al p'.'as'.'ses':
+            return 13;
+        case 'pa'.'sse'.'s cor'.'rectes':
+            return 14;
     }
 
     return false;
@@ -319,6 +323,7 @@ $additionnalTime = -1;
 if ($ret) {
     $ret = str_replace('sec"title="', 'sec" title="', $ret[0]);
     $ret = str_replace('&nbsp;', ' ', $ret);
+
     if ($xml = simplexml_load_string($ret)) {
         try {
             $formattedTimeString = (string)($xml->tr->td->div);
