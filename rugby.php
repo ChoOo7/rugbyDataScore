@@ -101,7 +101,10 @@ if (preg_match_all('!<td class="score"( rowspan="[0-9]+")*><span class="p[0-9]_h
                 $results['score1'] = $score1;
                 $results['score2'] = $score2;
             }
-        } else {
+        }
+        /*
+        else
+        {
             if ($local1Score > $local2Score) {
                 $score1++;
             } else {
@@ -110,6 +113,7 @@ if (preg_match_all('!<td class="score"( rowspan="[0-9]+")*><span class="p[0-9]_h
             $results['score1'] = $score1;
             $results['score2'] = $score2;
         }
+        */
     }
 }
 //var_dump($ret);
